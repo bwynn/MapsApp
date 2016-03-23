@@ -1,5 +1,5 @@
-angular.module('AddCtrl', ['geolocation'])
-  .controller('addCtrl', function($scope, $http, geolocation) {
+angular.module('AddCtrl', ['geolocation', 'Gservice'])
+  .controller('addCtrl', function($scope, $http, $rootScope, geolocation, gservice) {
     // intialized variables
     // =========================================================================
     $scope.formData = {};
@@ -13,6 +13,16 @@ angular.module('AddCtrl', ['geolocation'])
 
     // Functions
     // =========================================================================
+    // Get coordinates based on mouse click. When a click event is detected...
+    $rootScope.$on("clicked", function() {
+      // run the gservice functions associated with identifying coordinates
+      $scope.$apply(function() {
+        $scope.formData.latitude = parseFloat(gservice.clickLat).toFixed(3);
+        $scope.formData.longitude = parseFloat(gservice.clickLong).toFixed(3);
+        $scope.formData.htmlverified = "Nope (thanks for spamming my map...)";
+      });
+    });
+
     $scope.createUser = function() {
       // grabs all text box fields
       var userData = {
@@ -32,6 +42,8 @@ angular.module('AddCtrl', ['geolocation'])
           $scope.formData.gender = "";
           $scope.formData.age = "";
           $scope.formData.favlang = "";
+          // refresh the map with new data
+          gservice.refresh($scope.formData.latitude, $scope.formData.longitude);
         })
         .error(function(data) {
           console.log("Error: " + data);
