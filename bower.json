@@ -1,0 +1,11 @@
+{
+  "name": "google_maps_app",
+  "version": "0.0.1",
+  "dependencies": {
+    "angular-route": "latest",
+    "angularjs-geolocation": "latest",
+    "bootstrap": "latest",
+    "modernizr": "latest",
+    "holderjs": "latest"
+  }
+}
