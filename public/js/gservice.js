@@ -19,7 +19,7 @@ angular.module('Gservice', [])
     // Functions
     // =========================================================================
     // Refresh the map with new data. function will take new lat and long coords
-    googleMapService.refresh = function(latitude, longitude) {
+    googleMapService.refresh = function(latitude, longitude, filteredResults) {
       // clears the holding array of locations
       locations = [];
 
@@ -27,15 +27,25 @@ angular.module('Gservice', [])
       selectedLat = latitude;
       selectedLong = longitude;
 
-      // perform and ajax call to get all of the records in teh db
-      $http.get('/users').success(function(response) {
+      // if filtered results are provided in the refresh() call
+      if (filteredResults) {
+        // then convert the filtered results into map points
+        locations = convertToMapPoints(filteredResults);
 
-        // convert the result into Google Map Format
-        locations = convertToMapPoints(response);
+        // then, initialize the map, noting that a filter was used (to mark icons yellow)
+        initialize(latitude, longitude, true);
+      }
+      else {
+        // perform and ajax call to get all of the records in teh db
+        $http.get('/users').success(function(response) {
 
-        // then initialize the map
-        initialize(latitude, longitude);
-      }).error(function() {});
+          // convert the result into Google Map Format
+          locations = convertToMapPoints(response);
+
+          // then initialize the map
+          initialize(latitude, longitude, false);
+        }).error(function() {});
+      }
     };
 
     // Private inner functions
@@ -75,7 +85,7 @@ angular.module('Gservice', [])
     };
 
     // Initializes teh app
-    var initialize = function(latitude, longitude) {
+    var initialize = function(latitude, longitude, filter) {
 
       // uses the selected lat, long as starting point
       var myLatLng = {lat: selectedLat, lng: selectedLong};
@@ -89,13 +99,21 @@ angular.module('Gservice', [])
         });
       }
 
+      // if a filter was used to set the icons yellow, otherwise blue
+      if (filter) {
+        icon = "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png";
+      }
+      else {
+        icon = "http://maps.google.com/mapfiles/ms/icons/blue-dot.png";
+      }
+
       // loop through each location in the array and place a marker
       locations.forEach(function(n, i) {
         var marker = new google.maps.Marker({
           position: n.latlon,
           map: map,
           title: 'Big Map',
-          icon: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+          icon: icon,
         });
 
         // for each marker created, add a listener that checks for clicks
